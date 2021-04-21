@@ -1,0 +1,54 @@
+#Laboratorio para la implementación de un servidor LAMP (Linux Apache2 
+#MySQL/MariaDB PHP) en la distribución de GNU/linux, Ubuntu Server 20.04
+#
+#El laboratorio se trabajará sobre una máquina virtual remota creada en una nube
+#comercial pero los comandos utilizados aplican a cualquier tipo de instalación 
+#(usb_live_image, DVD, instalación por red) o almacenamiento, (servidor físico,
+# nube, máquina virtual).
+#
+#Se accederá de manera remota a la máquina virtual a través de una conexión
+#remota sobre ssh
+#
+#
+#Usamos el comando ssh con la siguiente sintaxis
+ssh root@IP-SERVER-REMOTO
+#
+#Deberán ver una salida similar a la siguiente:
+ECDSA key fingerprint is SHA256:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'IP-SERVER-REMOTO' (ECDSA) to the list of known hosts.
+root@IP-SERVER-REMOTO's password: 
+#
+#Digitar el password entregado por el instructor, ya esta conectado a la máquina remota y deberían ver
+#el símbolo del sistema (command prompt) predeterminado:)
+Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-51-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Thu Feb 25 00:55:27 UTC 2021
+
+  System load:  0.02              Users logged in:       0
+  Usage of /:   6.8% of 24.06GB   IPv4 address for eth0: 159.203.56.241
+  Memory usage: 22%               IPv4 address for eth0: 10.20.0.5
+  Swap usage:   0%                IPv4 address for eth1: 10.118.0.2
+  Processes:    103
+
+0 updates can be installed immediately.
+0 of these updates are security updates.
+
+Last login: Thu Feb 25 00:36:41 2021 from 190.171.112.151
+#
+#
+#
+#
+#Procedemos a crear un usuario con privilegios que no sea root
+adduser ubuntu_sysadmin
+usermod -a -G sudo ubuntu_sysadmin
+#
+#Procedemos a cerrar sesion en el server remoto con el usuario root y nos
+#conectamos con el usuario ubuntu_sysadmin recien creado
+ssh ubuntu_sysadmin@IP-SERVER-REMOTO 
+#alternativamente 
+ssh -l ubuntu_sysadmin IP-SERVER-REMOTO
