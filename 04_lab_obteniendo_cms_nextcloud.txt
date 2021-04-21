@@ -1,0 +1,17 @@
+#Moverse hacia la carpeta /var/www/html
+cd /var/www/html
+#Descargar nextcloud a esta ubicación y descomprimir
+sudo wget -c https://download.nextcloud.com/server/releases/nextcloud-21.0.1.zip
+#Listamos el contenido de la carpeta para ver el archivo descargado
+#
+ls -l
+#
+sudo unzip nextcloud-21.0.1.zip
+#
+#
+#Otorgar permisos a las carpetas
+chown -R www-data:www-data /var/www/html/nextcloud
+chmod -R 775 /var/www/html/nextcloud
+
+
+#En el siguiente laboratorio se proceder a configurar el web server

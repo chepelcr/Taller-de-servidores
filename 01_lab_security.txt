@@ -1,0 +1,162 @@
+#Comandos a ejecutar en la terminal
+#
+#Lo primero que debemos hacer es verificar la conexión a internet corriendo dig
+#en la terminal:
+dig
+#Se deberá ver en la terminal una salida similar a la siguiente:
+; <<>> DiG 9.11.3-1ubuntu1.5-Ubuntu <<>>
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 60974
+;; flags: qr rd ra; QUERY: 1, ANSWER: 13, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;.                              IN      NS
+
+;; ANSWER SECTION:
+.                       85594   IN      NS      k.root-servers.net.
+.                       85594   IN      NS      l.root-servers.net.
+.                       85594   IN      NS      j.root-servers.net.
+.                       85594   IN      NS      i.root-servers.net.
+.                       85594   IN      NS      d.root-servers.net.
+.                       85594   IN      NS      a.root-servers.net.
+.                       85594   IN      NS      b.root-servers.net.
+.                       85594   IN      NS      f.root-servers.net.
+.                       85594   IN      NS      e.root-servers.net.
+.                       85594   IN      NS      h.root-servers.net.
+.                       85594   IN      NS      g.root-servers.net.
+.                       85594   IN      NS      m.root-servers.net.
+.                       85594   IN      NS      c.root-servers.net.
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53)
+;; WHEN: Thu Apr 11 18:15:56 UTC 2019
+;; MSG SIZE  rcvd: 239
+#
+# 
+#Luego nos aseguramos de que el usuario root no se pueda conectar, esto con el
+#objetivo de elimiar superficies de ataque ya que el usuario root existe en 
+#todos los linux y es común que sea sujeto de ataques de fuerza bruta 
+#
+sudo vi /etc/ssh/sshd_config
+#Modificamos la directiva deseada
+PermitRootLogin no
+#guardamos y cerramos el archivo con :wq! y reiniciamos el servicio de ssh 
+sudo systemctl restart sshd
+#
+#Si perdemos la conexión simplemente volvemos a iniciar sesion como se hizo
+#anteriromente
+#
+#Una vez verificada la conexión a internet y removido el acceso de root por ssh
+# lo siguiente es verificar los repositorios de Ubuntu que vienen connfigurados
+# de manera predeterminada, al menos debe existir configurado main, restricted y
+# universe
+#
+#Ejecutamos el siguiente comando para hacerlo
+sudo vim /etc/apt/sources.list
+#Una vez en el archivo verificamos que las líneas queden similarea a las
+#siguiente 
+deb http://archive.ubuntu.com/ubuntu bionic main restricted universe
+deb http://archive.ubuntu.com/ubuntu bionic-security main restricted universe
+deb http://archive.ubuntu.com/ubuntu bionic-updates main restricted universe
+#
+#
+#Luego viene la actualización de la lista de software disponible desde los 
+#repositorios
+sudo apt update
+#Para listar los paquetes con actualizaciones disponibles usamos
+sudo apt list --upgradable
+#
+#Instalamos las actualizaciones 
+sudo apt upgrade
+
+
+#Utilizaremos el comando iptables para crear un firewall básico de seguridad.
+#
+#Lo primero que haremos antes de instalar es verificar que el sistema está
+#actualizado
+sudo apt update
+#Si ahy actualizaciones pendientes lass revisamos y las instalamos
+sudo apt upgrade
+#
+#Notese que apt update compara las versiones de los programas instalados en 
+#nuestro server con respceto al las disponibles en los repositorios 
+#configurados en el archivo /etc/apt/sources.list o en los archivos dentro de 
+#la carpeta /etc/apt/sources.list.d/
+#
+#Instalamos nmap que es una herramiento de monitores de puertos de red y mucho mas
+sudo apt install nmap
+#Realizamos chequeo de puertos
+sudo nmap -v -sS localhost
+#Conexiones activas
+netstat -tulpan
+ss -tulpn
+ 
+#Procesos actuales
+ps aux
+htop
+pstree
+
+#si no estan instalados se instalan con apt install como hemos venido haciendo 
+#con otros paquetes 
+#Chequear la tabla de particionado
+vi /etc/fstab
+
+#Se instala chkrootkit y rkhunter para moniterear el server de posibles rootkits
+apt install rkhunter chkrootkit
+chkrootkit
+rkhunter --check
+
+
+#Instalamos iptables
+sudo apt install iptables
+
+#Listamos las reglas instaladas por defecto 
+sudo iptables -L -n -v
+#
+#Nos aseguramos de estar en $HOME ejecutando cd sin argumentos
+cd
+#
+#Descargamos el script con los comandos para implemntar el firewall 
+#
+wget -c https://github.com/chepelcr/Taller-de-servidores/blob/main/firewall-iptables.sh
+#
+#Lo ejecutamos como superusuario
+sudo bash firewall-iptables.sh
+#
+#Listamos  reglas de nuestro firewall recién agregadas
+sudo iptables -L -n -v
+#
+#
+#Instalamos iptables-persistent para guardar las reglas actuales
+sudo apt install iptables-persistent
+#
+#Nos preguntará si guardamos las reglas actuales a los archivos 
+#/etc/iptables/rules.v4 y /etc/iptables/rules.v6, le decimos que si
+#
+#Ejecutamos el siguiente comando para que las reglas sean permanetes
+sudo netfilter-persistent save
+#
+#debemos ver una salida similar a la siguiente:
+run-parts: executing /usr/share/netfilter-persistent/plugins.d/15-ip4tables save
+run-parts: executing /usr/share/netfilter-persistent/plugins.d/25-ip6tables save
+#
+#
+#Instalamos fail2ban para agregar una capa extra de protección contra ataques 
+#de fuerza bruta y DOS -  DDOS.
+sudo apt install fail2ban
+sudo cp -a /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo vi /etc/fail2ban/jail.local 
+#En /etc/fail2ban/jail.local realizamos nuestras personalizaciones si queremos
+#En nuestro casi dejaremos las personalizaciones por defecto.si se hace algún cambio 
+#se debe reiniciar el servicio. 
+#
+#
+#fail2ban se puede configurar no solo apra proteger accesos a través de ssh pero
+#si desea saber mas del comando puede leer el manual del comando
+#
+#Volvemos a realizar el cheque de puertos
+nmap -v -sT localhost
+

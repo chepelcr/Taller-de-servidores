@@ -1,0 +1,68 @@
+#En este laboratorio procederemos a configurar apache
+#Lo primero que hacemos es crear el virtual host para nuestro server usando como
+#plantilla el virtualhost por defecto para http(No trabajaremos con https en 
+#este laboratorio)
+#Primero accedemos a /etc/apache2/apache2.conf
+sudo vim /etc/apache2/apache2.conf
+ y cambiamos 
+#
+#
+#
+<Directory /var/www/>
+        Options FollowSymLinks Indexes
+        AllowOverride None
+        Require all granted
+</Directory>
+# 
+#a 
+#
+<Directory /var/www/>
+        Options FollowSymLinks
+        AllowOverride None
+        Require all granted
+</Directory>
+#
+#Nótese que lo unico que hacemos es remover la directiva Indexes a la carpeta /var/www/
+#
+#Luego copiamos el virtualhost que viene por defecto para realizar nuestras personalizaciones
+#
+sudo cp -a /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/nextcloud.conf
+#
+#Se procede a cambiar la directiva DocumentRoot a /var/www/html/nextcloud en /etc/apache2/sites-available/nextcloud.conf 
+sudo vi /etc/apache2/sites-available/nextcloud.conf
+#Debemos cambiar la directiva DocumentRoot y agregar las directiva <Directory > </Directory> para que queden de la siguiente manera:
+#
+	DocumentRoot /var/www/html/nextcloud
+	ErrorLog ${APACHE_LOG_DIR}/nextcloud.error
+	CustomLog ${APACHE_LOG_DIR}/nextcloud.access combined
+
+        <Directory /var/www/html/nextcloud/>
+		Require all granted
+		Options FollowSymlinks MultiViews
+		AllowOverride All
+
+		<IfModule mod_dav.c>
+			Dav off
+		</IfModule>
+
+		SetEnv HOME /var/www/html/nextcloud
+		SetEnv HTTP_HOME /var/www/html/nextcloud
+		Satisfy Any
+	</Directory>
+#Guardar archivo con las teclas Escape mas  :wq! 
+#
+#
+#Deshabilitamos el sitio activado por defecto
+sudo a2dissite 000-default.conf
+sudo rm /var/www/html/index.html
+#
+#Activamos nuestro sitio y activamos los modulos requeridos
+sudo a2ensite nextcloud.conf
+a2enmod rewrite headers env dir mime setenvif ssl
+#reiniciamos el servicio de apache
+sudo systemctl restart apache2
+#
+#Ahora procedemos a realizar la configuración de nextcloud, necesitaremos la base de datos con el usuario autorizado a usarla y la contraseña y deberemos 
+#configurar un usuario administrativo para nextcloud, para esto volvemos a acceder a nuestro server a traves del navegador:
+#http://IP-SERVER-REMOTO
+#

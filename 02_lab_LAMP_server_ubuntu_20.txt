@@ -1,0 +1,98 @@
+sudo#GNU/Linux en general  utiliza el intérprete de comandos BASH.
+#
+#LAMP
+#Un servidor  "LAMP" es un conjunto de un sistema operativo mas software
+#adicional de código abierto, que permiten a dicho servidor alojar
+#sitios web dinámicos y/o aplicaciones web.
+#LAMP es un acrónimo que representa el sistema operativo GNU/Linux, el servidor
+#web Apache, con los datos del sitio almacenados en una base de datos
+#MySQL/MariaDB y PHP que procesa el contenido dinámico.(Javascript, llamada a
+#bases de datos, etc)
+#
+#
+#
+#Instalación de webserver
+sudo apt install apache2
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+#Accedemos en un browser 
+http://ip_server_remoto (Se puede usar comando "ip a" para ver su IP si la olvido)
+#
+#Configuracion de HTTPS
+sudo apt install openssl
+sudo a2enmod ssl
+#Configuracion de apache para permitir la reescritura de direcciones
+sudo vi /etc/apache2/apache2.conf
+#
+#Agregar las siguientes lineas al final del archivo
+<Directory /var/www/html>
+AllowOverride All
+</Directory>
+#
+#Crear clave privada y certificado
+sudo mkdir /etc/apache2/certificate
+sudo cd /etc/apache2/certificate
+sudo openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key
+#
+#Completar la informacion que solicitan
+COMMON_NAME: DIRECCION IP DEL SERVIDOR O DOMINIO
+#
+#Editar archivo de configuracion por defecto
+sudo vi /etc/apache2/sites-enabled/000-default.conf
+#
+#Reemplazar el contenido del archivo con las siguientes lineas
+<VirtualHost *:80>
+        RewriteEngine On
+        RewriteCond %{HTTPS} !=on
+        RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+</virtualhost>
+
+<VirtualHost *:443>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+        SSLEngine on
+        SSLCertificateFile /etc/apache2/certificate/apache-certificate.crt
+        SSLCertificateKeyFile /etc/apache2/certificate/apache.key
+</VirtualHost>
+#
+#Reiniciar el servicio de apache
+sudo systemctl restart apache2
+#
+#
+#Instalación de servidor de base de datos 
+sudo apt install mariadb-server 
+#Instalamos php y las dependencias recomendadas para que php pueda
+#interactuar con el webserver y la base de datos 
+sudo apt install libapache2-mod-php php php-{cli,fpm,json,common,mysql,zip,gd,intl,mbstring,curl,xml,pear,tidy,soap,bcmath,xmlrpc} 
+#
+#
+#Con esto ya tenemos instalado un servidor lamp funcional pero que dista
+#de ser seguro y no apto para producción. Mínimo se necesita establecer
+#un firewall y reforzar la seguridad de apache y php para pensar en un
+#entorno de producción.
+#
+#
+#Reforzando seguridad de apache2 y php
+# 
+#modificaciones de seguridad
+sudo vi /etc/apache2/conf-available/security.conf
+ServerTokens Dev
+ServerSignature Off
+TraceEnable Off
+#
+#Edición de las variables de la presentación típicas de un web server de uso general
+#Puede investigar por su cuenta que hace cada variable en la documentacion de php
+sudo vi /etc/php/7.4/cli/php.ini
+#Vefificar que las variables tengan los siguientes valores
+file_uploads = On
+allow_url_fopen = On
+memory_limit = 512M
+date.timezone = America/Costa_Rica
+upload_max_filesize = 100M
+max_execution_time = 360
+#Reiniciamos el servicio para cargar los cambios realizados
+sudo systemctl restart apache2
+# 
+#

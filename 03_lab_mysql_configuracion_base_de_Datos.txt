@@ -1,0 +1,109 @@
+#Laboratorio enfocado en la creación de una base de datos de uso general y
+#la creación y asignación de permisos del usuario administrador de dicha base de
+#datos.
+#Se asume haber completado el laboratorio de configuración de un servidor LAMP.
+#
+#Una vez que accedemos al sistema ejecutamos los siguientes comandos en la 
+#terminal.
+#
+#
+#Si no se ha corrido todavía, Lo primero que debemos hacer es correr el 
+siguiente comando en la terminal:
+sudo mysql_secure_installation.
+#
+#Si todavía no se ha configurado el password del usuario root de mysql 
+se procede a configurarlo  y se da si a todas las demas #opciones solicitadas.
+#La salida del comando deberia verse algo asi como lo siguiente:
+
+/******************************************************************************/
+*Securing the MySQL server deployment.
+*
+*Connecting to MySQL using a blank password.
+*
+*VALIDATE PASSWORD PLUGIN can be used to test passwords
+*and improve security. It checks the strength of password
+*and allows the users to set only those passwords which are
+*secure enough. Would you like to setup VALIDATE PASSWORD plugin?
+*
+*Press y|Y for Yes, any other key for No: n
+*Please set the password for root here.
+*
+*New password: Ucrlab.,123
+*Re-enter new password: Ucrlab.,123
+*By default, a MySQL installation has an anonymous user,
+*allowing anyone to log into MySQL without having to have
+*a user account created for them. This is intended only for
+*testing, and to make the installation go a bit smoother.
+*You should remove them before moving into a production
+*environment.
+*
+*Remove anonymous users? (Press y|Y for Yes, any other key for No) : y
+*Success.
+*
+*
+*Normally, root should only be allowed to connect from
+*'localhost'. This ensures that someone cannot guess at
+*the root password from the network.
+*
+*Disallow root login remotely? (Press y|Y for Yes, any other key for No) : y
+*Success.
+*
+*By default, MySQL comes with a database named 'test' that
+*anyone can access. This is also intended only for testing,
+*and should be removed before moving into a production
+*environment.
+*
+*
+*Remove test database and access to it? (Press y|Y for Yes, any other key for No) : y
+* - Dropping test database...
+*Success.
+*
+* - Removing privileges on test database...
+*Success.
+*
+*Reloading the privilege tables will ensure that all changes
+*made so far will take effect immediately.
+*
+*Reload privilege tables now? (Press y|Y for Yes, any other key for No) : y
+*Success.
+*
+*All done! 
+*
+/******************************************************************************/
+#
+# vez completado el comando anterior se procede a ingresar a la consola de mysql,
+# la opcion -u indica el usuario y -p para 
+#solicitar el password interactivamente.
+sudo mysql -u root -p 
+#Usamos el password de ubuntu_sysadmin o el que acabamos de crear para la base de datos 
+#
+#Crear base de datos y darle los permisos necesarios y suficientes para 
+#garantizar la funcionalidad y seguridad óptimas
+#
+#Crear la base de datos
+mysql> create database nextclouddb;
+#
+#Crear usuario de base de datos de drupal
+mysql> CREATE USER 'nextcloudu'@'localhost' IDENTIFIED BY 'Ucrlab.123';
+#
+#
+#Dar los permisos adecuados al usuario de la base de datos de drupal
+#
+mysql> GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,LOCK TABLES,CREATE TEMPORARY TABLES ON `nextclouddb`.* TO 'nextcloudu'@'localhost' IDENTIFIED BY 'Ucrlab.123';
+#
+#Actualizar los permisos
+mysql> FLUSH PRIVILEGES;
+#
+#Se pueden correr los siguientes comandos para verificar que se agregó correctamente:
+#
+#Base de datos
+mysql> show databases;
+#
+#Usuario
+mysql>SELECT User FROM mysql.user;
+#
+#Podemos ver las tablas de la base de datos
+mysql>use nextclouddb;
+mysql>show tables;
+#Para salir de la consola de administración de mysql se ejecuta exit
+mysql> exit;
